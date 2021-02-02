@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  app:
+    build: .
+    volumes:
+      - .:/go/src/
+    
+  dbSqlServer:
+    image: microsoft/mssql-server-linux:2017-latest
+    restart: always
+    volumes: 
+      - .sqldata:/var/lib/sqlserver/data
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=DockerSql2017@
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+  
+  dbMongo:
+    image: bitnami/mongodb
+    restart: always
+    volumes: 
+      - .mongodata:/var/lib/mongodb/data
+    ports:
+      - "27017:27017"
+
+  dbPostgres:
+    image: postgres:9.4
+    restart: always
+    tty: true
+    volumes:
+      - .pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=docker
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    tty: true
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@user.com
+      - PGADMIN_DEFAULT_PASSWORD=admin123
+    ports:
+      - "9000:80"
+    depends_on:
+      - dbPostgres
